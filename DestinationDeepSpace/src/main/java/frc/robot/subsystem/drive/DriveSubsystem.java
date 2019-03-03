@@ -23,9 +23,11 @@ import frc.robot.subsystem.autonomous.AutonomousConstants;
 import frc.robot.subsystem.autonomous.GuidanceAlgorithm;
 import frc.robot.subsystem.navigation.NavigationSubsystem;
 import frc.robot.subsystem.vision.CameraFeedback;
+import frc.robot.subsystem.vision.VisionConstants;
 import frc.robot.subsystem.vision.VisionSubsystem;
 import frc.robot.utils.Deadzone;
 import frc.robot.utils.JoystickScale;//for sam <3
+import frc.robot.utils.autotuner.DataWindow;
 import frc.robot.utils.talonutils.TalonUtils;
 
 
@@ -98,6 +100,10 @@ public class DriveSubsystem extends BitBucketSubsystem {
 	
 	// they always be saying "yee haw" but never "yaw hee" :(
 	private double yawSetPoint;
+
+
+
+	private DataWindow parallaxWindow;
 	
 
 
@@ -509,6 +515,8 @@ public class DriveSubsystem extends BitBucketSubsystem {
 				case Velocity: {
 					if (oi.autoAlign())
 					{
+						parallaxWindow = new DataWindow(VisionConstants.PARALLAX_DATA_WINDOW_SIZE);
+
 						double speed_ips = map(speed,
 						-1.0,
 						 1.0,
@@ -524,6 +532,10 @@ public class DriveSubsystem extends BitBucketSubsystem {
 							double offAxis = feedback.getOffAxis();
 							double parallax = feedback.getParallax();
 							double distance = feedback.getDistance();
+
+							parallaxWindow.add(parallax);
+
+							parallax = parallaxWindow.average();
 
 							SmartDashboard.putNumber(getName()+"/offAxis",offAxis);
 							SmartDashboard.putNumber(getName()+"/parallax",parallax);

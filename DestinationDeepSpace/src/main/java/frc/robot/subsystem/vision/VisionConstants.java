@@ -12,4 +12,6 @@ package frc.robot.subsystem.vision;
  */
 public class VisionConstants {
     public final static int DEFAULT_ILLUMINATOR_BRIGHTNESS = 255;
+
+    public final static int PARALLAX_DATA_WINDOW_SIZE = 8;
 }

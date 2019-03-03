@@ -41,8 +41,7 @@ public class AutonomousSubsystem extends BitBucketSubsystem {
 
     @Override
 	public void periodic() {
-		updateBaseDashboard();
-
+        updateBaseDashboard();
     }
 
 

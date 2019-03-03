@@ -40,7 +40,7 @@ public class MotorTestModes {
         encoderChooser.addOption("MagEncoderRelative", EncoderType.MagEncoderRelative);
         encoderChooser.addOption("MagEncoderAbsolute", EncoderType.MagEncoderAbsolute);
 
-        SmartDashboard.putData(encoderChooser);
+        SmartDashboard.putData("TestMode/Encoder", encoderChooser);
 
 
 
