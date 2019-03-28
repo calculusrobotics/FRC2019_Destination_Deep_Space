@@ -26,12 +26,13 @@ public class DriveConstants {
     // if there was a lot of system lag; we must be cautious!
     // An alternative is to use an alpha filter on the inputs to prevent the user
     // from changing the command too rapidly
-    public static final double DRIVE_MOTOR_CLOSED_LOOP_RAMP_SEC = 0.4;	    // No ramp rate on closed loop (use Motion Magic)
+    public static final double DRIVE_MOTOR_CLOSED_LOOP_RAMP_SEC = 0;	    // No ramp rate on closed loop (use Motion Magic)
 
-    public static final double MAX_ALLOWED_SPEED_IPS = 8.0*12.0;
+    public static final double MAX_ALLOWED_SPEED_IPS = 6.0*12.0;
     public static final double MAX_ALLOWED_TURN_DPS  = 180.0;
     public static final double MAX_ALLOWED_TURN_RADPS = Math.toRadians(MAX_ALLOWED_TURN_DPS);
     public static final double STANDARD_G_FTPSPS = 32.1740;
+    public static final double STANDARD_G_IPSPS = STANDARD_G_FTPSPS * 12.0;
     public static final double MAX_LAT_ACCELERATION_IPSPS = STANDARD_G_FTPSPS * 12.0;
     public static final double LOCK_DEADBAND_IPS = 12.0;  // ignore button command changes above this speed
     public static final double ALIGN_DEADBAND_DPS = 45.0; // ignore button command changes above this turn rate
@@ -212,5 +213,34 @@ public class DriveConstants {
    
     public static final double MOTOR_TEST_PERCENT = 0.5;
 
-	public static final double TURN_SIGN = 1.0;
+    public static final double TURN_SIGN = 1.0;
+    
+
+
+
+
+    // x center of mass of the robot without the arm (relative to the center of the robot)
+    public static final double ROBOT_NO_ARM_COM_X_INCHES = 0.695;
+    // y
+    public static final double ROBOT_NO_ARM_COM_Y_INCHES = 6.522;
+    // mass of robot without the arm (WITH BATTERY + BUMPERS)
+    public static final double ROBOT_NO_ARM_MASS_LBS = 84.526 + 5;
+
+    // height off of arm's pivot at which COM is located
+    public static final double ARM_COM_HEIGHT_INCHES = 5.190;
+    // height of arm's pivot from the floor
+    public static final double ARM_PIVOT_HEIGHT_INCHES = 19.002;
+    // mass of arm
+    public static final double ARM_MASS_LBS = 20.4754;
+
+    // distance from either wheel to the center of the robot
+    public static final double WHEEL_DISTANCE_INCHES = 10.040;
+
+    public static final double ROBOT_MASS_LBS             = ROBOT_NO_ARM_MASS_LBS + ARM_MASS_LBS;
+    public static final double ROBOT_NO_ARM_MASS_FRACTION = ROBOT_NO_ARM_MASS_LBS / ROBOT_MASS_LBS;
+    public static final double ARM_MASS_FRACTION          = ARM_MASS_LBS / ROBOT_MASS_LBS;
+
+    // calculated using a lot of math
+    // minimum of (max acceleration) over angle curve
+    public static final double MAX_ACCELERATION_IPSPS = 354.330709;
 }

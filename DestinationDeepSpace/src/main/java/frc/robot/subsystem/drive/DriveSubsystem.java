@@ -24,6 +24,7 @@ import frc.robot.subsystem.autonomous.GuidanceAlgorithm;
 import frc.robot.subsystem.navigation.NavigationSubsystem;
 import frc.robot.subsystem.vision.CameraFeedback;
 import frc.robot.subsystem.vision.VisionSubsystem;
+import frc.robot.subsystem.scoring.ScoringSubsystem;
 import frc.robot.utils.Deadzone;
 import frc.robot.utils.JoystickScale;//for sam <3
 import frc.robot.utils.talonutils.TalonUtils;
@@ -47,6 +48,7 @@ public class DriveSubsystem extends BitBucketSubsystem {
 	private final NavigationSubsystem navigation = NavigationSubsystem.instance();
 	private final VisionSubsystem vision = VisionSubsystem.instance();
 	private GuidanceAlgorithm guidance;
+	private final ScoringSubsystem scoringSubsystem = ScoringSubsystem.instance();
 
 	// drive styles that driver can choose on the shuffleboard
 	public enum DriveStyle {
@@ -96,6 +98,14 @@ public class DriveSubsystem extends BitBucketSubsystem {
 	
 	// they always be saying "yee haw" but never "yaw hee" :(
 	private double yawSetPoint;
+
+
+
+	// target linear velocity of drive train
+	// used to limit acceleration rate to get to target velocity instead
+	//     of directly commanding it (little control of acceleration)
+	private double targetVelocity_ips = 0;
+	private double targetOmega_radps = 0;
 	
 
 
@@ -520,11 +530,10 @@ public class DriveSubsystem extends BitBucketSubsystem {
 				
 							turnRate_radps = guidance.getTurnRate(distance);
 							//SmartDashboard.putNumber(getName()+"/autoTurnRate_radps",turnRate_radps);
-						}						
-						velocityDrive_auto(
-											speed_ips,
-											turnRate_radps
-						);
+						}
+						
+						targetVelocity_ips = speed_ips;
+						targetOmega_radps = turnRate_radps;
 
 					}
 					else {
@@ -666,7 +675,8 @@ public class DriveSubsystem extends BitBucketSubsystem {
 		
 		//SmartDashboard.putNumber(getName()+"/ManualTurnRate_radps",turn_radps);
 
-		velocityDrive_auto(speed_ips, turn_radps);
+		targetVelocity_ips = speed_ips;
+		targetOmega_radps = turn_radps;
 	}
 
 	public void doAutoTurn( double turn) {
@@ -743,19 +753,43 @@ public class DriveSubsystem extends BitBucketSubsystem {
 	public void periodic() {
 
 		updateBaseDashboard();
+		double left_inchps = leftMotors[0].getSelectedSensorVelocity()   * 10.0 * DriveConstants.WHEEL_DIAMETER_INCHES * Math.PI / 4096;
+		double right_inchps = rightMotors[0].getSelectedSensorVelocity() * 10.0 * DriveConstants.WHEEL_DIAMETER_INCHES * Math.PI / 4096;
+
 		if (getTelemetryEnabled())
 		{
 			SmartDashboard.putNumber(getName() + "/left encoder",  leftMotors[0].getSelectedSensorPosition());
 			SmartDashboard.putNumber(getName() + "/right encoder", rightMotors[0].getSelectedSensorPosition());
 
 
-
-			double left_inchps = leftMotors[0].getSelectedSensorVelocity() * 10.0 * 4 * Math.PI / 8192;
-			double right_inchps = rightMotors[0].getSelectedSensorVelocity() * 10.0 * 4 * Math.PI / 8192;
-
 			//SmartDashboard.putNumber(getName() + "/Real Left Speed (ips)", left_inchps);
 			//SmartDashboard.putNumber(getName() + "/Real Right Speed (ips)", right_inchps);
 		}
+
+
+
+		DriveStyle style = driveStyleChooser.getSelected();
+		if (style == DriveStyle.Velocity) {
+			// "slowly" adjust commanded velocity so as to not exceed robot tipping acceleration
+			double speed_ips = (left_inchps + right_inchps) / 2.0;
+
+			// max amount of increment velocity by given maximum acceleration and period
+			double deltaVel = DriveConstants.MAX_ACCELERATION_IPSPS * period;
+			// don't increment velocity too much if not necessary
+			if (Math.abs(speed_ips - targetVelocity_ips) <= deltaVel) {
+				speed_ips = targetVelocity_ips;
+			} else {
+				if (speed_ips > targetVelocity_ips) {
+					speed_ips -= deltaVel;
+				} else {
+					speed_ips += deltaVel;
+				}
+			}
+
+			velocityDrive_auto(speed_ips, targetOmega_radps);
+		}
+
+		
 		//SmartDashboard.putBoolean(getName()+"/RunningDiag", false);  
 	}
   	
