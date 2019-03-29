@@ -106,6 +106,7 @@ public class DriveSubsystem extends BitBucketSubsystem {
 	//     of directly commanding it (little control of acceleration)
 	private double targetVelocity_ips = 0;
 	private double targetOmega_radps = 0;
+	private double lastVelocity = 0;
 	
 
 
@@ -772,6 +773,11 @@ public class DriveSubsystem extends BitBucketSubsystem {
 		if (style == DriveStyle.Velocity) {
 			// "slowly" adjust commanded velocity so as to not exceed robot tipping acceleration
 			double speed_ips = (left_inchps + right_inchps) / 2.0;
+
+			double acceleration = (speed_ips - lastVelocity) / period;
+			lastVelocity = speed_ips;
+			// monitor the actual acceleration of the robot to see if underpreforming
+			SmartDashboard.putNumber(getName() + "/linear acceleration", acceleration);
 
 			// max amount of increment velocity by given maximum acceleration and period
 			double deltaVel = DriveConstants.MAX_ACCELERATION_IPSPS * period;
