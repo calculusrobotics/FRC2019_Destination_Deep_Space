@@ -754,8 +754,8 @@ public class DriveSubsystem extends BitBucketSubsystem {
 	public void periodic() {
 
 		updateBaseDashboard();
-		double left_inchps = leftMotors[0].getSelectedSensorVelocity()   * 10.0 * DriveConstants.WHEEL_DIAMETER_INCHES * Math.PI / 4096;
-		double right_inchps = rightMotors[0].getSelectedSensorVelocity() * 10.0 * DriveConstants.WHEEL_DIAMETER_INCHES * Math.PI / 4096;
+		double left_inchps = DriveConstants.ticksP100ToIps(leftMotors[0].getSelectedSensorVelocity());
+		double right_inchps = DriveConstants.ticksP100ToIps(rightMotors[0].getSelectedSensorVelocity());
 
 		if (getTelemetryEnabled())
 		{
@@ -778,6 +778,8 @@ public class DriveSubsystem extends BitBucketSubsystem {
 			lastVelocity = speed_ips;
 			// monitor the actual acceleration of the robot to see if underpreforming
 			SmartDashboard.putNumber(getName() + "/linear acceleration", acceleration);
+			SmartDashboard.putNumber(getName() + "/linear velocity",     speed_ips);
+			SmartDashboard.putNumber(getName() + "/target velocity",     lastVelocity);
 
 			// max amount of increment velocity by given maximum acceleration and period
 			double deltaVel = DriveConstants.MAX_ACCELERATION_IPSPS * period;
