@@ -247,7 +247,7 @@ public class ScoringSubsystem extends BitBucketSubsystem {
 
 		// for some mysterious reason that we never figured out, the encoder still wasn't
 		// reading angles between -180 and 180
-		// we found out that if we have it wait for about half a millisecond, then it will
+		// we found out that if we have it wait for about half a second, then it will
 		// start giving accurate values (maybe we should've done all this in init?)
 		// Thread.sleep(500) waits 500ms = 0.5sec before updating the encoder measurement
 		try {
